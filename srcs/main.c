@@ -1,39 +1,23 @@
 #include "../headers/pipex.h"
 
-void    error(char *err_message)
-{
-    perror(ft_strjoin("\033[31mError: ", err_message));
-    exit(EXIT_FAILURE);
-}
-
 int main(int argc, char **argv)
 {
-    int     fd[2];
-    int     nbytes;
-    pid_t   child_pid;
-    char    buffer[100];
+    int     fd;
+    int     bytes_read;
+    char    buffer[BUFFER_SIZE];
 
-    pipe(fd);
-
-    (void)argc;
-
-    if((child_pid = fork()) == -1)
-        error("Fork failed");
-    
-    // The child process
-    if(child_pid == 0)
+    fd = STDIN_FILENO;
+    if (argc > 1)
     {
-        close(fd[p_read]); // Child proccess does not need this end
-        write(fd[p_write], argv[1], ft_strlen(argv[1])+1);
-        exit(0);
+        fd = open(argv[1], O_RDONLY);
     }
-    // Parent Process
-    else
-    {
-        close(fd[p_write]); // Parent proccess does not need this end
 
-        nbytes = read(fd[p_read], buffer, sizeof(buffer));
-        printf("Read %d bytes from Input\n\nOutput\033[1;32m: %sforgeeks.org\n", nbytes, buffer);
+    while ((bytes_read = read(fd, buffer, BUFFER_SIZE)))
+    {
+        write(STDOUT_FILENO, buffer, bytes_read);
     }
+
+    close(fd);
+
     return (0);
 }

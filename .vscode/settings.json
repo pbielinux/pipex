@@ -8,6 +8,7 @@
         "bitset": "c",
         "ios": "c",
         "locale": "c",
-        "cstdio": "c"
+        "cstdio": "c",
+        "types.h": "c"
     }
 }

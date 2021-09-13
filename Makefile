@@ -6,7 +6,7 @@ BLUE = \033[0;34m
 GREY = \033[38;5;240m
 RESET = \033[0m
 
-NAME	=	pipex
+NAME	=	cat
 
 LIBFT	=	includes/libft
 
