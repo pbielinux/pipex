@@ -2,22 +2,33 @@
 
 int main(int argc, char **argv)
 {
-    int     fd;
-    int     bytes_read;
-    char    buffer[BUFFER_SIZE];
+    (void)argc;
+    char    *bin_file;
+    int     redirect_fd;
 
-    fd = STDIN_FILENO;
-    if (argc > 1)
-    {
-        fd = open(argv[1], O_RDONLY);
+    bin_file = argv[1];
+
+    if (fork() == 0)
+    {   
+        // Child process
+        if ((redirect_fd = open("redirect_fd.txt", O_WRONLY | O_CREAT | O_TRUNC, 0777)) == -1)
+        {
+            fprintf(stderr, "Error opening file\n");
+            exit(1);
+        }
+        dup2(redirect_fd, STDOUT_FILENO);
+        close(redirect_fd);
+
+        if (execvp(bin_file, &argv[1]) == -1)
+        {
+            fprintf(stderr, "Error executing %s\n", bin_file);
+            exit(1);
+        }
     }
-
-    while ((bytes_read = read(fd, buffer, BUFFER_SIZE)))
+    else
     {
-        write(STDOUT_FILENO, buffer, bytes_read);
+        wait(NULL);
+        printf(BGRN"\ndone!\n");
     }
-
-    close(fd);
-
     return (0);
 }

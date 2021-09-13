@@ -6,6 +6,7 @@
 # include <fcntl.h>
 # include <stdlib.h>
 # include <sys/types.h>
+# include <sys/wait.h>
 
 # include "ft_types.h"
 # include "../includes/libft/include/libft.h"
