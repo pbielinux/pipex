@@ -6,15 +6,16 @@ void    error(char *err_message)
     exit(EXIT_FAILURE);
 }
 
-int main()
+int main(int argc, char **argv)
 {
     int     fd[2];
     int     nbytes;
     pid_t   child_pid;
-    char    str[] = "fill the pipe!\n";
     char    buffer[100];
 
     pipe(fd);
+
+    (void)argc;
 
     if((child_pid = fork()) == -1)
         error("Fork failed");
@@ -23,7 +24,7 @@ int main()
     if(child_pid == 0)
     {
         close(fd[p_read]); // Child proccess does not need this end
-        write(fd[p_write], str, ft_strlen(str)+1);
+        write(fd[p_write], argv[1], ft_strlen(argv[1])+1);
         exit(0);
     }
     // Parent Process
@@ -31,8 +32,8 @@ int main()
     {
         close(fd[p_write]); // Parent proccess does not need this end
 
-        nbytes = read(fd[0], buffer, sizeof(buffer));
-        printf("\033[1;94mRead %d bytes from string:\033[1;32m %s", nbytes, buffer);
+        nbytes = read(fd[p_read], buffer, sizeof(buffer));
+        printf("Read %d bytes from Input\n\nOutput\033[1;32m: %sforgeeks.org\n", nbytes, buffer);
     }
     return (0);
 }

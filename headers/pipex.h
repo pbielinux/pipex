@@ -2,6 +2,7 @@
 # define PIPEX_H
 
 # include <unistd.h>
+# include <stdio.h>
 # include <sys/types.h>
 
 # include "ft_types.h"
