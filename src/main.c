@@ -6,6 +6,7 @@
 #include "Scanner.h"
 #include "Parser.h"
 #include "Node.h"
+#include "exec.h"
 
 #define BUFF_SIZE 80
 
@@ -27,6 +28,7 @@ int	main()
 	{
 		Node *parse_tree = eval(&line);
 		print(parse_tree, 0);
+		exec(parse_tree);
 		Node_drop(parse_tree);
 	}
 	Str_drop(&line);
@@ -69,13 +71,16 @@ void	print(Node *node, size_t ident)
 		i = 0;
 		printf("COMMAND:");
 		words = &node->data.command;
-		while (i++ < StrVec_length(words))
+		while (i < StrVec_length(words))
+		{
 			printf(" %s", Str_cstr(StrVec_ref(words, i)));
+			i++;
+		}
 		putchar('\n');
 	}
 	else if (node->type == PIPE_NODE)
 	{
-		printf("PIPE:");
+		printf("PIPE:\n");
 		print(node->data.pipe.left, ident + 4);
 		print(node->data.pipe.right, ident + 4);
 	}

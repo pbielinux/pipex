@@ -1,4 +1,4 @@
-project 			 := lec20-parser
+project 			 := Parser
 
 # Variables for path s of source, header
 inc_dir 			 := ./include
