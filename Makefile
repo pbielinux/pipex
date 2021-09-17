@@ -1,67 +1,85 @@
-# COLORS
-GREEN = \033[0;32m
-GREENGREEN = \033[38;5;46m
-RED = \033[0;31m
-BLUE = \033[0;34m
-GREY = \033[38;5;240m
-RESET = \033[0m
+project 			 := lec20-parser
 
-NAME	=	pipex
+# Variables for path s of source, header
+inc_dir 			 := ./include
+src_dir 			 := ./src
+sources 			 := $(wildcard ${src_dir}/*.c)
 
-LIBFT	=	includes/libft
+# Variables for paths of object file and binary targets
+build_dir   		 := ./build
+obj_dir 			 := ${build_dir}/obj
+bin_dir 			 := ${build_dir}/bin
+executable 			 := ${bin_dir}/${project}
+build_dirs 			 := ${obj_dir} ${bin_dir}
+objects 			 := $(subst .c,.o,$(subst ${src_dir},${obj_dir},${sources}))
 
-HEADERS	=	headers
+# C Compiler Configuration
+CC      			 := gcc # Using gcc compiler (alternative: clang)
+CFLAGS				 := -I${inc_dir} -g -Wall -std=c11 -O0
+# CFLAGS options:
+# -g 			Compile with debug symbols in binary files
+# -Wall 		Warnings: all - display every single warning
+# -std=c11  	Use the C2011 feature set
+# -I${inc_dir}  Look in the include directory for include files
+# -O0 			Disable compilation optimizations
 
-DIR_S	=	srcs
+# Splint Configuration
+SPLINT_FLAGS 		:= +charint +charintliteral
 
-DIR_O	=	obj
+# Phony rules do not create artifacts but are usefull workflow
+.PHONY: all run debug lint clean 
+.PHONY: leak-check help variables path-to-bin
 
-O_SRCS	:=	srcs/main.c 
+# all is the default goal
+all: ${executable}
 
-SRCS	:=	$(O_SRCS)
+# help: Display useful goals in this Makefile
+help:
+	@echo "Try one of the following make goals:"
+	@echo " * all - build project"
+	@echo " * run - execute the project"
+	@echo " * debug - begin a gdb process for the executable"
+	@echo " * leak-check - begin a valgrind memory leak test"
+	@echo " * clean - delete build files in project"
+	@echo " * variables - print Makefile's variables"
 
-OBJS	:= $(SRCS:%.c=$(DIR_O)/%.o)
+# Execute the project's binary file
+run: ${executable}
+	@${^}
 
-SUB_DIR_O := $(shell find $(DIR_S) -type d)
-SUB_DIR_O := $(SUB_DIR_O:%=$(DIR_O)/%)
+# Build the project by combining all object files
+${executable}: ${objects} | ${bin_dir}
+	${CC} ${CFLAGS} -o ${@} ${^}
 
-DEPS	=	$(HEADERS)/pipex.h
+# Build object files from sources in a template pattern
+${obj_dir}/%.o: ${src_dir}/%.c | ${obj_dir}
+	${CC} ${CFLAGS} -c -o ${@} ${<}
 
-CC		=	gcc
+# The build directories should be recreated when prerequisite
+${build_dirs}:
+	mkdir -p ${@}
 
-# Change optimization flag to -O3 for faster execution
-CFLAGS	=	-O3 -Wall -Wextra -Werror
+# Start a gdb process for the binary
+debug: ${executable}
+	gdb ${^}
 
-LIBS	=	-lm -L./$(LIBFT) -lft
+# Run static analysis to find issues
+lint:
+	splint ${SPLINT_FLAGS} -I${inc_dir} ${sources}
 
-INCLUDES	= -I/$(LIBFT)/ -I/headers/
+# Start a valgrind process
+leak-check: ${executable}
+	valgrind --leak-check=full ${^}
 
-$(DIR_O)/%.o: %.c
-	@mkdir -p $(DIR_O)
-	@mkdir -p $(SUB_DIR_O)
-	@$(CC) $(CFLAGS) $(INCLUDES) -o $@ -c $<
-	@echo "$(GREEN)//$(RESET)\c"
-
-$(NAME):	$(DEPS) $(OBJS)
-	@make -C $(LIBFT)
-	@$(CC) $(CFLAGS) -o $(NAME) $(OBJS) $(LIBS)
-	@echo "\n\n[$(GREENGREEN)$(NAME)$(RESET)]: $(NAME) was created\n$(GREENGREEN)"
-	@cat includes/graphic_assets/logo
-
-all:		$(NAME)
-
+# clean: Delete all artifacts produced in the build process
 clean:
-	@make -C $(LIBFT) clean
-	@rm -rf $(DIR_O)
-	@echo "[$(GREENGREEN)Pipex$(RESET)]: $(RED)Objects Directory was deleted$(RESET)"
-	@echo "[$(GREENGREEN)Pipex$(RESET)]: $(RED)Object Files were deleted$(RESET)"
+	rm -rf ${build_dir}
 
-fclean:	clean
-	@rm -f $(LIBFT)/libft.a
-	@echo "[$(GREENGREEN)Pipex$(RESET)]: $(RED)$(LIBFT) was deleted$(RESET)"
-	@rm -f $(NAME)
-	@echo "[$(GREENGREEN)Pipex$(RESET)]: $(RED)$(NAME) was deleted$(RESET)\n"
-
-re:			fclean all
-
-.PHONY:		all clean fclean re bonus
+# variables: Print variables in this Makefile for Makefile debugging
+variables:
+	@echo "Sources: ${sources}"
+	@echo "Executable: ${executable}"
+	@echo "Build Dirs: ${build_dirs}"
+	@echo "Objects: ${objects}"
+	@echo "C Compiler: ${CC}"
+	@echo "C Compiler Flags: ${CFLAGS}"
