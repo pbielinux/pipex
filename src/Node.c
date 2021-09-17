@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #include "Node.h"
 #include "Guards.h"
 
@@ -7,28 +5,31 @@
 *	Constructors
 */
 
-Node *CommandNode_new(char c)
+Node *ErrorNode_new(const char *msg)
 {
-	Node *node = OOM_GUARD(malloc(sizeof(Node)), __FILE__, __LINE__);
-	node->type = CHAR_NODE;
-	node->data.value = c;
-	return node;
-};
-
-Node *PairNode_new(Node *left, Node *right)
-{
-	Node *node = OOM_GUARD(malloc(sizeof(Node)), __FILE__, __LINE__);
-	node->type = PAIR_NODE;
-	node->data.pair.left = left;
-	node->data.pair.right = right;
+	Node *node = malloc(sizeof(Node));
+	OOM_GUARD(node, __FILE__, __LINE__);
+	node->type = ERROR_NODE;
+	node->data.error = msg;
 	return node;
 }
 
-Node *ErrorNode_new(const char *msg)
+Node *CommandNode_new(StrVec words)
 {
-	Node *node = OOM_GUARD(malloc(sizeof(Node)), __FILE__, __LINE__);
-	node->type = ERROR_NODE;
-	node->data.error = msg;
+	Node *node = malloc(sizeof(Node));
+	OOM_GUARD(node, __FILE__, __LINE__);
+	node->type = COMMAND_NODE;
+	node->data.command= words;
+	return node;
+};
+
+Node *PipeNode_new(Node *left, Node *right)
+{
+	Node *node = malloc(sizeof(Node));
+	OOM_GUARD(node, __FILE__, __LINE__);
+	node->type = PIPE_NODE;
+	node->data.pipe.left = left;
+	node->data.pipe.right = right;
 	return node;
 }
 
@@ -38,16 +39,20 @@ Node *ErrorNode_new(const char *msg)
 
 void *Node_drop(Node *self)
 {
-	switch (self->type)
+	/* Handle By Cases */
+	if (self->type == ERROR_NODE)
+		free (self);
+	else if (self->type == COMMAND_NODE)
 	{
-	case ERROR_NODE:
-	case CHAR_NODE:
-		break;
-	case PAIR_NODE:
-		Node_drop(self->data.pair.left);
-		Node_drop(self->data.pair.right);
-		break;
+		StrVec_drop(&(self->data.command));
+		free (self);
 	}
-	free(self);
+	else if (self->type == PIPE_NODE)
+	{
+		/* Pipe node is special because you have to recursively free the command nodes */
+		Node_drop(self->data.pipe.left);
+		Node_drop(self->data.pipe.right);
+		free(self);
+	}
 	return NULL;
 };

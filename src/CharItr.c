@@ -10,7 +10,7 @@ CharItr	CharItr_value(const char *start, size_t length)
 	return rnVal;
 }
 
-CharItr	CharIter_of_Str(const Str *str)
+CharItr	CharItr_of_Str(const Str *str)
 {
 	/* Feed data into CharItr_value */
 	return CharItr_value(Str_cstr(str), Str_length(str));

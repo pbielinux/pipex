@@ -1,80 +1,84 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 
-#include "CharItr.h"
+#include "Str.h"
 #include "Scanner.h"
-#include "Node.h"
 #include "Parser.h"
+#include "Node.h"
 
-#define MAX_LINE_LENGTH 1024
-static char buffer[MAX_LINE_LENGTH];
+#define BUFF_SIZE 80
 
-/* Read a line up to max_length into buffer */
-bool read_next_line(char *buffer, size_t max_length);
+/**
+ * This program reads an input line from stdin and prints textual
+ * representations of the tokens scanned from lines of input.
+ */
 
-/* Helper to print a Token */
-void visit(const Node *node, size_t spaces);
+// These three functions provide the basis of a REPL:
+// Read-Evaluate-Print-Loop
+size_t	read(Str *line, FILE *stream);
+Node	*eval(Str *input);
+void	print(Node *node, size_t indention);
 
-/* Helper to indent output by n_spaces */
-void indent(size_t n_spaces);
-
-int main()
+int	main()
 {
-	while (read_next_line(buffer, MAX_LINE_LENGTH))
+	Str line = Str_value(BUFF_SIZE);
+	while (read(&line, stdin))
 	{
-		CharItr itr = CharItr_value(buffer, strlen(buffer));
-		Scanner scanner = Scanner_value(itr);
-		Node *node = parse(&scanner);
-		visit(node, 0);
-		Node_drop(node);
+		Node *parse_tree = eval(&line);
+		print(parse_tree, 0);
+		Node_drop(parse_tree);
 	}
+	Str_drop(&line);
+	return EXIT_SUCCESS;
 }
 
-// Original Input String:
-// (a (b c))
-//
-// Expected visit Output:
-//
-// Pair(
-//   Char('a')
-//   Pair(
-//     Char('b')
-//     Char('c')
-//   )
-// )
-void visit(const Node *node, size_t spaces)
+size_t	read(Str *line, FILE *stream)
 {
-	indent(spaces);
-	switch (node->type)
+	printf("Parser> ");
+
+	// Clear Str contents
+	Str_splice(line, 0, Str_length(line), NULL, 0);
+
+	static char buffer[BUFF_SIZE];
+	while (fgets(buffer, BUFF_SIZE, stream) != NULL)
 	{
-		case PAIR_NODE:
-			printf("Pair(\n");
-			// Children
-			visit(node->data.pair.left, spaces + 2);
-			visit(node->data.pair.right, spaces + 2);
-			indent(spaces);
-			printf(")\n");
-			break;
-		case CHAR_NODE:
-			printf("Char('%c')\n", node->data.value);
-			break;
-		case ERROR_NODE:
-			fprintf(stderr, "Error: %s\n", node->data.error);
+		Str_append(line, buffer);
+		if (strchr(buffer, '\n') != NULL)
 			break;
 	}
+	return Str_length(line);
 }
 
-void indent(size_t spaces)
+Node*	eval(Str *line)
 {
-	for (size_t i = 0; i < spaces; ++i)
-	{
+	Scanner scanner = Scanner_value(CharItr_of_Str(line));
+	return parse(&scanner);
+}
+
+void	print(Node *node, size_t ident)
+{
+	size_t	i;
+	StrVec	*words;
+
+	i = 0;
+	while (i++ < ident)
 		putchar(' ');
+	if (node->type == COMMAND_NODE)
+	{
+		i = 0;
+		printf("COMMAND:");
+		words = &node->data.command;
+		while (i++ < StrVec_length(words))
+			printf(" %s", Str_cstr(StrVec_ref(words, i)));
+		putchar('\n');
 	}
-}
-
-bool read_next_line(char *buffer, size_t max_length)
-{
-	return fgets(buffer, max_length, stdin) != NULL;
+	else if (node->type == PIPE_NODE)
+	{
+		printf("PIPE:");
+		print(node->data.pipe.left, ident + 4);
+		print(node->data.pipe.right, ident + 4);
+	}
+	else
+		printf("ERROR: %s\n", node->data.error);
 }

@@ -15,7 +15,6 @@ Str Str_value(size_t capacity)
 {
 	Str s = Vec_value(capacity + 1, sizeof(char));
 	Vec_set(&s, 0, &NULL_CHAR);
-	int x;
 	return s;
 }
 
@@ -39,7 +38,7 @@ char *Str_ref(const Str *self, const size_t index)
 	return (char *)Vec_ref(self, index);
 }
 
-Str	Str_from(const char *cstr)
+Str Str_from(const char *cstr)
 {
 	Str newStr = Str_value(1);
 	int i = 0;

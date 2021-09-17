@@ -22,7 +22,7 @@ void StrVec_drop(StrVec *self);
 size_t StrVec_length(const StrVec *self);
 
 /* Returns a pointer to a Str at given index.  */
-Str* StrVec_ref(const StrVec *self, size_t index);
+Str *StrVec_ref(const StrVec *self, size_t index);
 
 /* Push a Str value onto the end of the StrVec.
  * The StrVec self becomes the owner of Str value. */

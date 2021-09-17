@@ -4,6 +4,7 @@
 
 #include "Guards.h"
 #include "Vec.h"
+#include "c-callstack.h"
 
 static void _ensure_capacity(Vec *self, size_t n);
 static void exitOnError(unsigned line);
@@ -70,7 +71,7 @@ void *Vec_ref(const Vec *self, size_t index)
 	if (index < self->length)
 		return self->buffer + (index * self->item_size);
 	else
-		exitOnError(__LINE__);
+		NL_RETURN(-1);
 	return NULL; /* Remove Warnings */
 }
 

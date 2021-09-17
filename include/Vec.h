@@ -16,7 +16,7 @@
  */
 typedef struct Vec
 {
-	const size_t item_size; /* size of an item in bytes */
+	size_t item_size; /* size of an item in bytes */
 	size_t length;			/* number of items in Vec */
 	size_t capacity;		/* number of items buffer can store */
 	void *buffer;			/* heap memory storing items */

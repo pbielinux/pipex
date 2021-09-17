@@ -17,30 +17,38 @@ void StrVec_drop(StrVec *self)
 	Vec_drop(self);
 }
 
-size_t StrVec_length(const StrVec *self) {
+size_t StrVec_length(const StrVec *self)
+{
 	return Vec_length(self);
 }
 
-Str* StrVec_ref(const StrVec *self, size_t index) {
-	return (Str*)(Vec_ref(self, index));
+Str *StrVec_ref(const StrVec *self, size_t index)
+{
+	return (Str *)(Vec_ref(self, index));
 }
 
-void StrVec_push(StrVec *self, Str value) {
+void StrVec_push(StrVec *self, Str value)
+{
 	Vec_set(self, Vec_length(self), &value);
 }
 
-Str StrVec_pop(StrVec *self) {
-	Str poppedStr = *((Str*) (Vec_ref(self, Vec_length(self)-1)));
-	Vec_splice(self, Vec_length(self)-1, 1, NULL, 0);
+Str StrVec_pop(StrVec *self)
+{
+	Str poppedStr = *((Str *)(Vec_ref(self, Vec_length(self) - 1)));
+	Vec_splice(self, Vec_length(self) - 1, 1, NULL, 0);
 	return poppedStr;
 }
 
-void StrVec_set(StrVec *self, size_t index, Str value) {
-	if (index == Vec_length(self)) {
-		Vec_splice(self, Vec_length(self), 0, &value, 1);	
-	} else { 
-		Str oldStr = *((Str*) (Vec_ref(self, index)));
+void StrVec_set(StrVec *self, size_t index, Str value)
+{
+	if (index == Vec_length(self))
+	{
+		Vec_splice(self, Vec_length(self), 0, &value, 1);
+	}
+	else
+	{
+		Str oldStr = *((Str *)(Vec_ref(self, index)));
 		Vec_set(self, index, &value);
-		Str_drop(&oldStr);	
+		Str_drop(&oldStr);
 	}
 }

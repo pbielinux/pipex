@@ -11,7 +11,7 @@ typedef enum	TokenType {
 
 typedef struct	Token {
 	TokenType	type;
-	Str		lexeme; // Normally this would be a slice!
+	Str			lexeme;
 }				Token;
 
 #endif
