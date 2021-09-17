@@ -4,10 +4,17 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-typedef struct CharItr {
-    const char *cursor;
-    const char *sentinel;
-} CharItr;
+#include "Str.h"
+
+/* 
+ * A CharItr is an iterator over an array of char data.
+ */
+
+typedef struct	CharItr
+{
+	const char	*cursor;
+	const char	*sentinel;
+}				CharItr;
 
 /*
  * Constructor. Resulting CharItr value does not own any
@@ -16,10 +23,17 @@ typedef struct CharItr {
  */
 CharItr CharItr_value(const char *start, size_t length);
 
+/**
+ * Get a CharItr of a Str, starting from its first char value.
+ * The lifetime of the CharItr is the shorter of the Str's lifetime
+ * or an any mutation of the Str.
+ */
+CharItr CharItr_of_Str(const Str *str);
+
 /*
  * Returns a pointer to the current location of the iterator's cursor.
  */
-const char* CharItr_cursor(const CharItr *self);
+const char *CharItr_cursor(const CharItr *self);
 
 /*
  * Returns true when there are additional characters to consume

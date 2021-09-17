@@ -1,17 +1,17 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
-typedef enum TokenType {
-    END_TOKEN = 0,
-    CHAR_TOKEN = 1,
-    SPACE_TOKEN = 2,
-    LPAREN_TOKEN = 3,
-    RPAREN_TOKEN = 4
-} TokenType;
+#include "Str.h"
 
-typedef struct Token {
-    TokenType type;
-    char lexeme; // Normally this would be a slice!
-} Token;
+typedef enum	TokenType {
+	END_TOKEN = -1,
+	WORD_TOKEN = 0,
+	PIPE_TOKEN = 1,
+}				TokenType;
+
+typedef struct	Token {
+	TokenType	type;
+	Str		lexeme; // Normally this would be a slice!
+}				Token;
 
 #endif

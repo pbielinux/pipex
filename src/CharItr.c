@@ -2,12 +2,18 @@
 
 #include "CharItr.h"
 
-CharItr CharItr_value(const char *start, size_t length)
+CharItr	CharItr_value(const char *start, size_t length)
 {
-	CharItr ci = {
-		(char *)start,
-		start + length};
-	return ci;
+	CharItr	rnVal;
+	rnVal.cursor = start;
+	rnVal.sentinel = start + length;
+	return rnVal;
+}
+
+CharItr	CharIter_of_Str(const Str *str)
+{
+	/* Feed data into CharItr_value */
+	return CharItr_value(Str_cstr(str), Str_length(str));
 }
 
 const char *CharItr_cursor(const CharItr *self)
