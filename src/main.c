@@ -37,7 +37,7 @@ int	main()
 
 size_t	read(Str *line, FILE *stream)
 {
-	printf("Parser> ");
+	printf("Shell> ");
 
 	// Clear Str contents
 	Str_splice(line, 0, Str_length(line), NULL, 0);

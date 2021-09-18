@@ -9,7 +9,7 @@ Node* parse(Scanner *scanner)
 
 	/* If there is no node, or there is a pipe node, we have an error */
 	if (!Scanner_has_next(scanner))
-		return ErrorNode_new("NO more Readable Tokens!");
+		return ErrorNode_new("No more Readable Tokens!");
 	else if (Scanner_peek(scanner).type == END_TOKEN)
 		return ErrorNode_new("End Token Encountered!");
 	else if (Scanner_peek(scanner).type == PIPE_TOKEN)
