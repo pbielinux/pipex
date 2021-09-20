@@ -3,6 +3,6 @@
 
 #include "Node.h"
 
-void	exec(Node *node);
+void	exec(Node *node, int file_in, int file_out);
 
 #endif // !EXEC_H

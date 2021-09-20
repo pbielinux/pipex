@@ -1,4 +1,4 @@
-project 			 := Parser
+project 			 := pipex
 
 # Variables for path s of source, header
 inc_dir 			 := ./include

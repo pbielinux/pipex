@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
+# include <fcntl.h>
 
 #include "exec.h"
 
@@ -17,13 +18,14 @@ static int	exec_node(Node *node, Context *ctx);
 static int	exec_command(Node *node, Context *ctx);
 static int	exec_pipe(Node *node, Context *ctx);
 
-void	exec(Node *node)
+
+void	exec(Node *node, int file_in, int file_out)
 {
 	int	children;
 	Context	ctx = {
 		{
-			STDIN_FILENO,
-			STDOUT_FILENO
+			file_in,
+			file_out
 		},
 		-1
 	};
