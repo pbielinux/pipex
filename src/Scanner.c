@@ -60,10 +60,10 @@ static void throwUselessInput(Scanner *self)
 /* Ensures that self->next always contains the next available token, if one exists */
 static void fillnextPos(Scanner *self)
 {
-	Token next;
-	Str buildingWord;
-	char peekedChar;
-	char nextChar;
+	Token	next;
+	Str		buildingWord;
+	char	peekedChar;
+	char	nextChar;
 
 	/* Delete meaningless input */
 	throwUselessInput(self);

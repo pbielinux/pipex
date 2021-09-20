@@ -87,3 +87,4 @@ variables:
 	@echo "Objects: ${objects}"
 	@echo "C Compiler: ${CC}"
 	@echo "C Compiler Flags: ${CFLAGS}"
+	

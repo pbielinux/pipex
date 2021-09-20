@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libft.h"
+#include "pipex.h"
 
 #define BUFF_SIZE 80
 
@@ -13,8 +13,8 @@
 
 int	main(int argc, char **argv, char **envp)
 {
-	if (argc == 5)
-		ft_putchar_fd('!', 1);
+	if (argc >= 5)
+		ft_pipex(argc, argv, envp);
 	else
 	{
 		ft_putstr_fd("\033[31mError: Bad arguments\n\e[0m", 2);
