@@ -76,7 +76,7 @@ static t_str	build_word(t_scanner *self)
 		splice.delete_count = 0;
 		splice.items = &next_char;
 		splice.insert_count = 1;
-		str_splice(&building_wrd, splice);
+		str_splice(&building_wrd, &splice);
 	}
 	return (building_wrd);
 }

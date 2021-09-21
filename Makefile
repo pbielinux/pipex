@@ -30,7 +30,7 @@ LIBS				 := -L${libft_dir} -lft
 SPLINT_FLAGS 		:= +charint +charintliteral
 
 # Phony rules do not create artifacts but are usefull workflow
-.PHONY: all run debug lint clean 
+.PHONY: all run debug lint clean re fclean
 .PHONY: leak-check help variables path-to-bin
 
 # all is the default goal
@@ -61,6 +61,7 @@ ${obj_dir}/%.o: ${src_dir}/%.c | ${obj_dir}
 # The build directories should be recreated when prerequisite
 ${build_dirs}:
 	mkdir -p ${@}
+	make -C ${libft_dir}
 
 # Start a gdb process for the binary
 debug: ${executable}
@@ -77,6 +78,11 @@ leak-check: ${executable}
 # clean: Delete all artifacts produced in the build process
 clean:
 	rm -rf ${build_dir}
+
+fclean: clean
+	make clean -C ${libft_dir}
+
+re: fclean all
 
 # variables: Print variables in this Makefile for Makefile debugging
 variables:

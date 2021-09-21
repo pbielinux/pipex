@@ -22,16 +22,12 @@
 #include "char_itr.h"
 #include "parser.h"
 
-#define BUFF_SIZE 1025
+#define BUFF_SIZE 1024
 
-/**
- * This program reads an input line from stdin and prints textual
- * representations of the tokens scanned from lines of input.
- */
-
-t_node	*eval(t_str *input);
-void	print(t_node *node, size_t indention);
-int		open_file(char *argv, int i);
+t_node		*eval(t_str *input);
+void		print(t_node *node, size_t indention);
+int			open_file(char *argv, int i);
+static int	print_usage(void);
 
 int	main(int argc, char **argv, char **envp)
 {
@@ -39,20 +35,25 @@ int	main(int argc, char **argv, char **envp)
 	t_node		*parse_tree;
 	int			i;
 
-	line = str_value(BUFF_SIZE);
-	i = 2;
-	while (i < argc - 1)
+	if (argc >= 5)
 	{
-		str_append(&line, argv[i]);
-		if (i < argc - 2)
-			str_append(&line, " | ");
-		i++;
+		line = str_value(BUFF_SIZE);
+		i = 2;
+		while (i < argc - 1)
+		{
+			str_append(&line, argv[i]);
+			if (i++ < argc - 2)
+				str_append(&line, " | ");
+		}
+		parse_tree = eval(&line);
+		exec(parse_tree, open_file(argv[1], 2),
+			open_file(argv[argc - 1], 1), envp);
+		node_drop(parse_tree);
+		str_drop(&line);
+		return (EXIT_SUCCESS);
 	}
-	parse_tree = eval(&line);
-	exec(parse_tree, open_file(argv[1], 2), open_file(argv[argc - 1], 1), envp);
-	node_drop(parse_tree);
-	str_drop(&line);
-	return (EXIT_SUCCESS);
+	else
+		return (print_usage());
 }
 
 t_node	*eval(t_str *line)
@@ -107,4 +108,11 @@ int	open_file(char *argv, int i)
 		exit(EXIT_FAILURE);
 	}
 	return (file);
+}
+
+static int	print_usage(void)
+{
+	ft_putstr_fd("\033[31mError: Bad argument\n\e[0m", 2);
+	ft_putstr_fd("Ex: ./pipex <file1> <cmd1> <cmd2> <cmd...> <file2>\n", 1);
+	return (EXIT_SUCCESS);
 }
