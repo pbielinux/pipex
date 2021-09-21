@@ -57,9 +57,10 @@ void	fill_next_pos(t_scanner *self)
 
 static t_str	build_word(t_scanner *self)
 {
-	t_str	building_wrd;
-	char	peeked_char;
-	char	next_char;
+	t_str		building_wrd;
+	char		peeked_char;
+	char		next_char;
+	t_splice	splice;
 
 	building_wrd = str_value(1025);
 	while ((char_itr_has_next(&self->char_itr)))
@@ -71,7 +72,11 @@ static t_str	build_word(t_scanner *self)
 		if (peeked_char == '\t' | peeked_char == '\n' | peeked_char == ' ')
 			break ;
 		next_char = char_itr_next(&self->char_itr);
-		str_splice(&building_wrd, str_length(&building_wrd), 0, &next_char, 1);
+		splice.index = str_length(&building_wrd);
+		splice.delete_count = 0;
+		splice.items = &next_char;
+		splice.insert_count = 1;
+		str_splice(&building_wrd, splice);
 	}
 	return (building_wrd);
 }
