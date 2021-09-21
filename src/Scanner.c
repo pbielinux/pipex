@@ -1,112 +1,51 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   scanner.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: pbielik <marvin@42.fr>                     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/09/20 23:37:13 by pbielik           #+#    #+#             */
+/*   Updated: 2021/09/20 23:37:16 by pbielik          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <ctype.h>
 
-#include "Scanner.h"
+#include "scanner.h"
 
-static void fillnextPos(Scanner *self);
-
-Scanner Scanner_value(CharItr char_itr)
+t_scanner	scanner_value(t_char_itr char_itr)
 {
-	/* Create a meaningless token to start */
-	Token next = {
-		END_TOKEN,
-		Str_from("")};
-	/* Create an itr using the meaningless token */
-	Scanner itr = {
-		char_itr,
-		next};
+	t_token		next;
+	t_scanner	itr;
 
-	fillnextPos(&itr);		/* Update the 'next' member of our token to be meaningful */
-	Str_drop(&next.lexeme); /* Free the string from the meaningless token */
-	return itr;
+	next.type = END_TOKEN;
+	next.lexeme = str_from("");
+	itr.char_itr = char_itr;
+	itr.next = next;
+	fill_next_pos(&itr);
+	str_drop(&next.lexeme);
+	return (itr);
 }
 
-bool Scanner_has_next(const Scanner *self)
+bool	scanner_has_next(const t_scanner *self)
 {
 	if (self->next.type == END_TOKEN)
-		return false;
+		return (false);
 	else
-		return true;
+		return (true);
 }
 
-Token Scanner_peek(const Scanner *self)
+t_token	scanner_peek(const t_scanner *self)
 {	
-	return self->next;
+	return (self->next);
 }
 
-Token Scanner_next(Scanner *self)
+t_token	scanner_next(t_scanner *self)
 {
-	Token toGive = Scanner_peek(self);
-	fillnextPos(self);
-	return (toGive);
-}
+	t_token	to_give;
 
-/* Takes a scanner and deletes all chars that are meaningless to the grammar
- * until the first valid character is reac */
-static void throwUselessInput(Scanner *self)
-{
-	while (CharItr_has_next(&self->char_itr))
-	{
-		if ((CharItr_peek(&self->char_itr)) == '\t')
-			CharItr_next(&self->char_itr);
-		else if ((CharItr_peek(&self->char_itr)) == '\n')
-			CharItr_next(&self->char_itr);
-		else if ((CharItr_peek(&self->char_itr)) == ' ')
-			CharItr_next(&self->char_itr);
-		else
-			break;
-	}
-}
-
-/* Ensures that self->next always contains the next available token, if one exists */
-static void fillnextPos(Scanner *self)
-{
-	Token	next;
-	Str		buildingWord;
-	char	peekedChar;
-	char	nextChar;
-
-	/* Delete meaningless input */
-	throwUselessInput(self);
-
-	/* If we have no more input in the char_itr than yield an END_TOKEN */
-	if (!CharItr_has_next(&self->char_itr))
-	{
-		next.type = END_TOKEN;
-		self->next = next;
-		return;
-	}
-
-	/* Check for a pipe token next */
-	if (CharItr_peek(&self->char_itr) == '|')
-	{
-		next.type = PIPE_TOKEN;
-		next.lexeme = Str_from("|");
-		self->next = next;
-		CharItr_next(&self->char_itr);
-		return;
-	}
-
-	/* If we make it here, then we have a word to read */
-	buildingWord = Str_value(1025);
-	while ((CharItr_has_next(&self->char_itr)))
-	{
-		if(((CharItr_peek(&self->char_itr)) == '|')
-			| ((CharItr_peek(&self->char_itr)) == '\0'))
-			break;
-	
-		/* Parse out the invalid characters */
-		peekedChar = CharItr_peek(&self->char_itr);
-		if (peekedChar == '\t'
-			| peekedChar == '\n'
-			| peekedChar == ' ')
-			break;
-		
-		/* If we make it here then we have a char that fits in our word */
-		nextChar = CharItr_next(&self->char_itr);
-		Str_splice(&buildingWord, Str_length(&buildingWord), 0, &nextChar, 1);
-	}
-	/* buildingWord now contains the next word, so we can compose the word token */
-	next.type = WORD_TOKEN;
-	next.lexeme = buildingWord;
-	self->next = next;
+	to_give = scanner_peek(self);
+	fill_next_pos(self);
+	return (to_give);
 }

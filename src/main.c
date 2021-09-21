@@ -1,13 +1,26 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: pbielik <marvin@42.fr>                     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/09/20 23:36:32 by pbielik           #+#    #+#             */
+/*   Updated: 2021/09/20 23:36:34 by pbielik          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
 
-#include "Str.h"
-#include "Scanner.h"
-#include "Parser.h"
-#include "Node.h"
+#include "libft.h"
+#include "node.h"
+#include "scanner.h"
 #include "exec.h"
+#include "char_itr.h"
+#include "parser.h"
 
 #define BUFF_SIZE 1025
 
@@ -16,81 +29,44 @@
  * representations of the tokens scanned from lines of input.
  */
 
-// These three functions provide the basis of a REPL:
-// Read-Evaluate-Print-Loop
-size_t	read(Str *line, FILE *stream);
-Node	*eval(Str *input);
-void	print(Node *node, size_t indention);
+t_node	*eval(t_str *input);
+void	print(t_node *node, size_t indention);
 int		open_file(char *argv, int i);
 
 int	main(int argc, char **argv, char **envp)
 {
-	StrVec	input = StrVec_value(argc);
-	Str		line = Str_value(BUFF_SIZE);
-	Node	*parse_tree;
-	int		i;
-	int filein;
-	int fileout;
+	t_str		line;
+	t_node		*parse_tree;
+	int			i;
 
-	
-	input = StrVec_value(argc);
-	line = Str_value(BUFF_SIZE);
-	
-	// Create the input line inserting pipes between commands
+	line = str_value(BUFF_SIZE);
 	i = 2;
 	while (i < argc - 1)
 	{
-		StrVec_push(&input, Str_from(argv[i]));
+		str_append(&line, argv[i]);
 		if (i < argc - 2)
-			StrVec_push(&input, Str_from(" | "));
-			i++;
-	}
-	i = 0;
-	while (i < StrVec_length(&input))
-	{
-		Str_append(&line, Str_cstr(StrVec_ref(&input, i)));
+			str_append(&line, " | ");
 		i++;
 	}
-
-	filein = open_file(argv[1], 2);
-	fileout = open_file(argv[argc - 1], 1);
-	
 	parse_tree = eval(&line);
-	//print(parse_tree, 0);
-	exec(parse_tree, filein, fileout);
-
-	Node_drop(parse_tree);
-	Str_drop(&line);
-	return EXIT_SUCCESS;
+	exec(parse_tree, open_file(argv[1], 2), open_file(argv[argc - 1], 1), envp);
+	node_drop(parse_tree);
+	str_drop(&line);
+	return (EXIT_SUCCESS);
 }
 
-size_t	read(Str *line, FILE *stream)
+t_node	*eval(t_str *line)
 {
-	printf("Parser> ");
+	t_scanner	scanner;
 
-	// Clear Str contents
-	Str_splice(line, 0, Str_length(line), NULL, 0);
-
-	static char buffer[BUFF_SIZE];
-	while (fgets(buffer, BUFF_SIZE, stream) != NULL)
-	{
-		Str_append(line, buffer);
-		if (strchr(buffer, '\n') != NULL)
-			break;
-	}
-	return Str_length(line);
+	scanner = scanner_value(char_itr_of_str(line));
+	return (parse(&scanner));
 }
 
-Node*	eval(Str *line)
+void	print(t_node *node, size_t ident)
 {
-	Scanner scanner = Scanner_value(CharItr_of_Str(line));
-	return parse(&scanner);
-}
-
-void	print(Node *node, size_t ident)
-{
-	size_t	i;
-	StrVec	*words;
+	size_t		i;
+	t_strvec	*words;
 
 	i = 0;
 	while (i++ < ident)
@@ -100,11 +76,8 @@ void	print(Node *node, size_t ident)
 		i = 0;
 		printf("COMMAND:");
 		words = &node->data.command;
-		while (i < StrVec_length(words))
-		{
-			printf(" %s", Str_cstr(StrVec_ref(words, i)));
-			i++;
-		}
+		while (i < strvec_length(words))
+			printf(" %s", str_cstr(strvec_ref(words, i++)));
 		putchar('\n');
 	}
 	else if (node->type == PIPE_NODE)

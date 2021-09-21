@@ -1,58 +1,66 @@
-#include "Node.h"
-#include "Guards.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   node.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: pbielik <marvin@42.fr>                     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/09/20 23:36:42 by pbielik           #+#    #+#             */
+/*   Updated: 2021/09/20 23:36:44 by pbielik          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-/*
-*	Constructors
-*/
+#include "node.h"
+#include "guards.h"
 
-Node *ErrorNode_new(const char *msg)
+t_node	*error_node_new(const char *msg)
 {
-	Node *node = malloc(sizeof(Node));
-	OOM_GUARD(node, __FILE__, __LINE__);
-	node->type = ERROR_NODE;
-	node->data.error = msg;
-	return node;
+	t_node	*new;
+
+	new = malloc(sizeof(t_node));
+	omm_guard(new, __FILE__, __LINE__);
+	new->type = ERROR_NODE;
+	new->data.error = msg;
+	return (new);
 }
 
-Node *CommandNode_new(StrVec words)
+t_node	*command_node_new(t_strvec words)
 {
-	Node *node = malloc(sizeof(Node));
-	OOM_GUARD(node, __FILE__, __LINE__);
-	node->type = COMMAND_NODE;
-	node->data.command= words;
-	return node;
-};
+	t_node	*new;
 
-Node *PipeNode_new(Node *left, Node *right)
-{
-	Node *node = malloc(sizeof(Node));
-	OOM_GUARD(node, __FILE__, __LINE__);
-	node->type = PIPE_NODE;
-	node->data.pipe.left = left;
-	node->data.pipe.right = right;
-	return node;
+	new = malloc(sizeof(t_node));
+	omm_guard(new, __FILE__, __LINE__);
+	new->type = COMMAND_NODE;
+	new->data.command = words;
+	return (new);
 }
 
-/*
-*	Destructor
-*/
-
-void *Node_drop(Node *self)
+t_node	*pipe_node_new(t_node *left, t_node *right)
 {
-	/* Handle By Cases */
+	t_node	*new;
+
+	new = malloc(sizeof(t_node));
+	omm_guard(new, __FILE__, __LINE__);
+	new->type = PIPE_NODE;
+	new->data.pipe.left = left;
+	new->data.pipe.right = right;
+	return (new);
+}
+
+void	*node_drop(t_node *self)
+{
 	if (self->type == ERROR_NODE)
 		free (self);
 	else if (self->type == COMMAND_NODE)
 	{
-		StrVec_drop(&(self->data.command));
+		strvec_drop(&(self->data.command));
 		free (self);
 	}
 	else if (self->type == PIPE_NODE)
 	{
-		/* Pipe node is special because you have to recursively free the command nodes */
-		Node_drop(self->data.pipe.left);
-		Node_drop(self->data.pipe.right);
+		node_drop(self->data.pipe.left);
+		node_drop(self->data.pipe.right);
 		free(self);
 	}
-	return NULL;
-};
+	return (NULL);
+}

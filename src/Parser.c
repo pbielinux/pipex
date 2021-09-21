@@ -1,75 +1,77 @@
-#include "Parser.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parser.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: pbielik <marvin@42.fr>                     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/09/20 23:37:01 by pbielik           #+#    #+#             */
+/*   Updated: 2021/09/20 23:37:02 by pbielik          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-static Node* parseCommand(Scanner *scanner);
+#include "parser.h"
 
-Node* parse(Scanner *scanner)
+static t_node	*parse_command(t_scanner *scanner);
+static t_node	*parse_pipe(t_scanner *scanner, t_strvec *working_cmd);
+
+t_node	*parse(t_scanner *scanner)
 {
-	Token pipeToken;
-	Token fetched;
+	t_token	pipe_token;
+	t_token	fetched;
 
-	/* If there is no node, or there is a pipe node, we have an error */
-	if (!Scanner_has_next(scanner))
-		return ErrorNode_new("No more Readable Tokens!");
-	else if (Scanner_peek(scanner).type == END_TOKEN)
-		return ErrorNode_new("End Token Encountered!");
-	else if (Scanner_peek(scanner).type == PIPE_TOKEN)
+	if (!scanner_has_next(scanner))
+		return (error_node_new("No more Readable Tokens!"));
+	else if (scanner_peek(scanner).type == END_TOKEN)
+		return (error_node_new("End Token Encountered!"));
+	else if (scanner_peek(scanner).type == PIPE_TOKEN)
 	{
-		/* Pull the literal pipe and free it */
-		pipeToken = Scanner_next(scanner);
-		Str_drop(&pipeToken.lexeme);
-
-		/* Now, free every token that comes after it since
-		 * no more parsing will occur at the point that 
-		 * an error node is reached, so that following memory 
-		 * must be freed before returning the error*/
-		while (Scanner_has_next(scanner))
+		pipe_token = scanner_next(scanner);
+		str_drop(&pipe_token.lexeme);
+		while (scanner_has_next(scanner))
 		{
-			fetched = Scanner_next(scanner);
-			Str_drop(&fetched.lexeme);
+			fetched = scanner_next(scanner);
+			str_drop(&fetched.lexeme);
 		}
-
-		return ErrorNode_new("Unexpected Pipe Encountered!");
+		return (error_node_new("Unexpected Pipe Encountered!"));
 	}
-	else if (Scanner_peek(scanner).type == WORD_TOKEN)
-		return parseCommand(scanner);
-	
-	return NULL; // To silent the errors
+	else if (scanner_peek(scanner).type == WORD_TOKEN)
+		return (parse_command(scanner));
+	return (NULL);
 }
 
-static Node* parseCommand(Scanner *scanner)
+static t_node	*parse_command(t_scanner *scanner)
 {
-	StrVec	workingCommand;
-	Token	cmd;
-	Token	pipeToken;
-	Node	*left;
-	Node	*right;
+	t_strvec	working_cmd;
+	t_token		cmd;
 
-	/* By virtue of being here, the next token is a command token by assumption */
-	workingCommand = StrVec_value(1); /* Add all of the words of the command together */
-	cmd = Scanner_next(scanner); /* Pull the next token from the scanner */
-	StrVec_push(&workingCommand, cmd.lexeme); /* Push the retrieved token onto workingCommand */
-	/* Keep Reading Until we hit a END_TOKEN or PIPE_TOKEN */
-	while (Scanner_has_next(scanner))
+	working_cmd = strvec_value(1);
+	cmd = scanner_next(scanner);
+	strvec_push(&working_cmd, cmd.lexeme);
+	while (scanner_has_next(scanner))
 	{
-		/* If it is a command, then push it onto workingCommand */
-		if (Scanner_peek(scanner).type == WORD_TOKEN)
+		if (scanner_peek(scanner).type == WORD_TOKEN)
 		{
-			cmd = Scanner_next(scanner);
-			StrVec_push(&workingCommand, cmd.lexeme); /* Push the retrieved token onto workingCommand */
+			cmd = scanner_next(scanner);
+			strvec_push(&working_cmd, cmd.lexeme);
 		}
-		else if (Scanner_peek(scanner).type == END_TOKEN)
-			return CommandNode_new(workingCommand);
-		else if (Scanner_peek(scanner).type == PIPE_TOKEN)
-		{
-			/* If we have a pipe */
-			left = CommandNode_new(workingCommand);
-			/* Pull the literal pipe and free it */
-			pipeToken = Scanner_next(scanner);
-			Str_drop(&pipeToken.lexeme);
-			/* Get the right node */
-			right = parse(scanner);
-			return PipeNode_new(left, right);
-		}
+		else if (scanner_peek(scanner).type == END_TOKEN)
+			return (command_node_new(working_cmd));
+		else if (scanner_peek(scanner).type == PIPE_TOKEN)
+			return (parse_pipe(scanner, &working_cmd));
 	}
-	return CommandNode_new(workingCommand);
+	return (command_node_new(working_cmd));
+}
+
+static t_node	*parse_pipe(t_scanner *scanner, t_strvec *working_cmd)
+{
+	t_token	pipe_token;
+	t_node	*left;
+	t_node	*right;
+
+	left = command_node_new(*working_cmd);
+	pipe_token = scanner_next(scanner);
+	str_drop(&pipe_token.lexeme);
+	right = parse(scanner);
+	return (pipe_node_new(left, right));
 }
