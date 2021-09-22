@@ -52,7 +52,7 @@ run: ${executable}
 
 # Build the project by combining all object files
 ${executable}: ${objects} | ${bin_dir}
-	${CC} ${CFLAGS} ${LIBS} -o ${@} ${^}
+	${CC} ${CFLAGS} -o ${@} ${^} ${LIBS}
 
 # Build object files from sources in a template pattern
 ${obj_dir}/%.o: ${src_dir}/%.c | ${obj_dir}
