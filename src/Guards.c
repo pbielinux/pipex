@@ -13,11 +13,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "libft.h"
+
 void	*omm_guard(void *ptr, char *file, int number)
 {
 	if (ptr == NULL)
 	{
-		fprintf(stderr, "%s:%d Out of Memory", file, number);
+		ft_putstr_fd(file, 2);
+		ft_putnbr_fd(number, 2);
+		ft_putstr_fd(" - Out of Memory", 2);
 		exit(EXIT_FAILURE);
 	}
 	return (ptr);

@@ -1,3 +1,10 @@
+# Variables for colors
+GRN = \033[0;32m
+GRNGRN = \033[38;5;46m
+RED = \033[0;31m
+BLUE = \033[0;34m
+RST = \033[0m
+
 project 			 := pipex
 
 # Variables for path s of source, header
@@ -16,7 +23,7 @@ objects 			 := $(subst .c,.o,$(subst ${src_dir},${obj_dir},${sources}))
 
 # C Compiler Configuration
 CC      			 := gcc # Using gcc compiler (alternative: clang)
-CFLAGS				 := -I${inc_dir} -I${libft_dir}/include -g -Wall -std=c11 -O0
+CFLAGS				 := -I${inc_dir} -I${libft_dir}/include -g -Wall -Werror -Wextra -std=c11 -O0
 # CFLAGS options:
 # -g 			Compile with debug symbols in binary files
 # -Wall 		Warnings: all - display every single warning
@@ -52,16 +59,22 @@ run: ${executable}
 
 # Build the project by combining all object files
 ${executable}: ${objects} | ${bin_dir}
-	${CC} ${CFLAGS} -o ${@} ${^} ${LIBS}
+	@${CC} ${CFLAGS} -o ${@} ${^} ${LIBS}
+	@echo "\n[$(GRNGRN) PIPE_X $(RST)]: Compiled!"
+	@echo "$(GRNGRN)"
+	@cat ./include/graphic_assets/logo
+	@cat ./include/graphic_assets/done
+	@echo "\n"
 
 # Build object files from sources in a template pattern
 ${obj_dir}/%.o: ${src_dir}/%.c | ${obj_dir}
-	${CC} ${CFLAGS} -c -o ${@} ${<}
+	@${CC} ${CFLAGS} -c -o ${@} ${<}
+	@echo "$(GRN)/$(RST)\c"
 
 # The build directories should be recreated when prerequisite
 ${build_dirs}:
-	mkdir -p ${@}
-	make -C ${libft_dir}
+	@mkdir -p ${@}
+	@test -s ${libft_dir}/libft.a || make -C ${libft_dir}
 
 # Start a gdb process for the binary
 debug: ${executable}
@@ -77,10 +90,11 @@ leak-check: ${executable}
 
 # clean: Delete all artifacts produced in the build process
 clean:
-	rm -rf ${build_dir}
+	@echo "\n[$(GRNGRN) PIPE_X $(RST)]: $(RED)Objects and Executable were removed!$(RST)"
+	@rm -rf ${build_dir}
 
 fclean: clean
-	make clean -C ${libft_dir}
+	@make clean -C ${libft_dir}
 
 re: fclean all
 

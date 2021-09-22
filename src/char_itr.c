@@ -13,6 +13,7 @@
 #include <stdio.h>
 
 #include "char_itr.h"
+#include "libft.h"
 
 t_char_itr	char_itr_value(const char *start, size_t length)
 {
@@ -36,7 +37,9 @@ char	char_itr_peek(const t_char_itr *self)
 	}
 	else
 	{
-		fprintf(stderr, "%s:%d - Out of Bounds", __FILE__, __LINE__);
+		ft_putstr_fd(__FILE__, 2);
+		ft_putnbr_fd(__LINE__, 2);
+		ft_putstr_fd(" - Out of Bounds", 2);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -49,7 +52,9 @@ char	char_itr_next(t_char_itr *self)
 	}
 	else
 	{
-		fprintf(stderr, "%s:%d - Out of Bounds", __FILE__, __LINE__);
+		ft_putstr_fd(__FILE__, 2);
+		ft_putnbr_fd(__LINE__, 2);
+		ft_putstr_fd(" - Out of Bounds", 2);
 		exit(EXIT_FAILURE);
 	}
 }

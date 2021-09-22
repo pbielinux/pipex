@@ -67,28 +67,29 @@ t_node	*eval(t_str *line)
 void	print(t_node *node, size_t ident)
 {
 	size_t		i;
-	t_strvec	*words;
 
 	i = 0;
 	while (i++ < ident)
-		putchar(' ');
+		ft_putchar(' ');
 	if (node->type == COMMAND_NODE)
 	{
 		i = 0;
-		printf("COMMAND:");
-		words = &node->data.command;
-		while (i < strvec_length(words))
-			printf(" %s", str_cstr(strvec_ref(words, i++)));
-		putchar('\n');
+		ft_putstr("COMMAND:");
+		while (i < strvec_length(&node->data.command))
+		{
+			ft_putchar(' ');
+			ft_putstr(str_cstr(strvec_ref(&node->data.command, i++)));
+		}
+		ft_putchar('\n');
 	}
 	else if (node->type == PIPE_NODE)
 	{
-		printf("PIPE:\n");
+		ft_putstr("PIPE:\n");
 		print(node->data.pipe.left, ident + 4);
 		print(node->data.pipe.right, ident + 4);
 	}
 	else
-		printf("ERROR: %s\n", node->data.error);
+		ft_putstr("ERROR: \n");
 }
 
 int	open_file(char *argv, int i)
@@ -102,11 +103,6 @@ int	open_file(char *argv, int i)
 		file = open(argv, O_CREAT | O_TRUNC | O_WRONLY, 0644);
 	else if (i == 2)
 		file = open(argv, O_RDONLY, 0);
-	if (file == -1)
-	{
-		printf("ERROR!\n");
-		exit(EXIT_FAILURE);
-	}
 	return (file);
 }
 
